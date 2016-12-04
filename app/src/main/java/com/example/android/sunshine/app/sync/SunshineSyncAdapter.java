@@ -36,6 +36,13 @@ import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.muzei.WeatherMuzeiSource;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,7 +60,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
-    public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
+    public static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     public static final String ACTION_DATA_UPDATED =
             "com.example.android.sunshine.app.ACTION_DATA_UPDATED";
     // Interval at which to sync with the weather, in seconds.
@@ -89,6 +96,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
     }
 
     @Override
@@ -368,6 +376,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 updateWidgets();
                 updateMuzei();
+                updateWearble(cVVector.firstElement());
                 notifyWeather();
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
@@ -378,6 +387,11 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_INVALID);
         }
+    }
+
+    private void updateWearble(ContentValues contentValues) {
+        final WearbleSync wearbleSync = new WearbleSync(getContext());
+        wearbleSync.updateWearble(contentValues);
     }
 
     private void updateWidgets() {
@@ -428,33 +442,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
                     int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
                     Resources resources = context.getResources();
-                    int artResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
-                    String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
 
-                    // On Honeycomb and higher devices, we can retrieve the size of the large icon
-                    // Prior to that, we use a fixed size
-                    @SuppressLint("InlinedApi")
-                    int largeIconWidth = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
-                            ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
-                            : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
-                    @SuppressLint("InlinedApi")
-                    int largeIconHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
-                            ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height)
-                            : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+                    Bitmap largeIcon = getBitmap(context, weatherId, resources);
 
-                    // Retrieve the large icon
-                    Bitmap largeIcon;
-                    try {
-                        largeIcon = Glide.with(context)
-                                .load(artUrl)
-                                .asBitmap()
-                                .error(artResourceId)
-                                .fitCenter()
-                                .into(largeIconWidth, largeIconHeight).get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        Log.e(LOG_TAG, "Error retrieving large icon from " + artUrl, e);
-                        largeIcon = BitmapFactory.decodeResource(resources, artResourceId);
-                    }
                     String title = context.getString(R.string.app_name);
 
                     // Define the text of the forecast.
@@ -503,6 +493,37 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 cursor.close();
             }
         }
+    }
+
+    public static Bitmap getBitmap(Context context, int weatherId, Resources resources) {
+        int artResourceId = Utility.getArtResourceForWeatherCondition(weatherId);
+        String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
+
+        // On Honeycomb and higher devices, we can retrieve the size of the large icon
+        // Prior to that, we use a fixed size
+        @SuppressLint("InlinedApi")
+        int largeIconWidth = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
+                : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+        @SuppressLint("InlinedApi")
+        int largeIconHeight = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height)
+                : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+
+        // Retrieve the large icon
+        Bitmap largeIcon;
+        try {
+            largeIcon = Glide.with(context)
+                    .load(artUrl)
+                    .asBitmap()
+                    .error(artResourceId)
+                    .fitCenter()
+                    .into(largeIconWidth, largeIconHeight).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(LOG_TAG, "Error retrieving large icon from " + artUrl, e);
+            largeIcon = BitmapFactory.decodeResource(resources, artResourceId);
+        }
+        return largeIcon;
     }
 
     /**
