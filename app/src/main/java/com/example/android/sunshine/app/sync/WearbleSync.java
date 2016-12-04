@@ -24,8 +24,6 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MAX_TEMP;
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MIN_TEMP;
@@ -65,6 +63,9 @@ public class WearbleSync {
                 // Request access only to the Wearable API
                 .addApi(Wearable.API)
                 .build();
+
+        onStart();
+
     }
 
     private static Asset createAssetFromBitmap(Bitmap bitmap) {
@@ -86,7 +87,6 @@ public class WearbleSync {
             final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
             Asset asset = createAssetFromBitmap(bitmap);
 
-            onStart();
 
             PutDataMapRequest putDataMapReq = PutDataMapRequest.create(WEATHER);
             final DataMap dataMap = putDataMapReq.getDataMap();
@@ -100,7 +100,6 @@ public class WearbleSync {
             PendingResult<DataApi.DataItemResult> pendingResult =
                     Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
 
-            onStop();
 
         }
 

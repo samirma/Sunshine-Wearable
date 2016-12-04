@@ -62,18 +62,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
-    public static final String IMG = "IMG";
     public static final String WEATHER = "/weather";
-
-    public static final String COLUMN_WEATHER_ID = "weather_id";
-
-    // Short description and long description of the weather, as provided by API.
-    // e.g "clear" vs "sky is clear".
-    public static final String COLUMN_SHORT_DESC = "short_desc";
-
-    // Min and max temperatures for the day (stored as floats)
-    public static final String COLUMN_MIN_TEMP = "min";
-    public static final String COLUMN_MAX_TEMP = "max";
 
 
     /**
@@ -88,6 +77,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
     private static final int MSG_UPDATE_TIME = 0;
     public static final String TAG = SunShineWatchFace.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
+    private WeatherDetail weatherDetail;
 
     @Override
     public Engine onCreateEngine() {
@@ -180,6 +170,8 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
                     .build();
 
             mGoogleApiClient.connect();
+
+            weatherDetail = null;
 
         }
 
@@ -292,12 +284,20 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            String text = mAmbient
-                    ? String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
-                    mCalendar.get(Calendar.MINUTE))
-                    : String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR),
-                    mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+            if (weatherDetail != null) {
+                canvas.drawText(weatherDetail.toString(), mXOffset, mYOffset, mTextPaint);
+            } else {
+
+                String text = mAmbient
+                        ? String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
+                        mCalendar.get(Calendar.MINUTE))
+                        : String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR),
+                        mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
+                canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+
+            }
+
+
         }
 
         /**
@@ -348,10 +348,8 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
                 DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem);
                 DataMap config = dataMapItem.getDataMap();
 
-                double high = config.getDouble(COLUMN_MAX_TEMP);
-                double low = config.getDouble(COLUMN_MIN_TEMP);
-                String desc = config.getString(COLUMN_SHORT_DESC);
-                final Asset asset = config.getAsset(IMG);
+                weatherDetail = new WeatherDetail(config);
+
 
             }
         }
