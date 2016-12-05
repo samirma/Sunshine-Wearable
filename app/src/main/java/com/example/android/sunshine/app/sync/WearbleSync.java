@@ -1,21 +1,13 @@
 package com.example.android.sunshine.app.sync;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.bumptech.glide.Glide;
-import com.example.android.sunshine.app.R;
-import com.example.android.sunshine.app.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
@@ -85,14 +77,14 @@ public class WearbleSync {
         final String dataString = String.format("%s-%s-%s-%s", weatherId, desc, low, high);
         if (!oldData.equals(dataString)) {
             oldData = dataString;
-            final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
-            Asset asset = createAssetFromBitmap(bitmap);
+            //final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
+            //Asset asset = createAssetFromBitmap(bitmap);
 
 
             PutDataMapRequest putDataMapReq = PutDataMapRequest.create(WEATHER);
             final DataMap dataMap = putDataMapReq.getDataMap();
 
-            //dataMap.putDouble(COLUMN_MAX_TEMP, high);
+            dataMap.putDouble(COLUMN_MAX_TEMP, high);
 
             PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
 
@@ -105,6 +97,7 @@ public class WearbleSync {
                             Log.e(LOG_TAG, String.format("PutDataItem %s, Status code: %d", success, dataItemResult.getStatus().getStatusCode()));
                         }
                     });
+
 
         }
 
