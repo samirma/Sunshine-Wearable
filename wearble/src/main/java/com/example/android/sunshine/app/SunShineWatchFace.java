@@ -147,30 +147,6 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
 
             mCalendar = Calendar.getInstance();
 
-            mGoogleApiClient = new GoogleApiClient.Builder(getBaseContext())
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(Bundle connectionHint) {
-                            Log.d(TAG, "onConnected: " + connectionHint);
-                            Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
-                        }
-                        @Override
-                        public void onConnectionSuspended(int cause) {
-                            Log.d(TAG, "onConnectionSuspended: " + cause);
-                        }
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult result) {
-                            Log.d(TAG, "onConnectionFailed: " + result);
-                        }
-                    })
-                    // Request access only to the Wearable API
-                    .addApi(Wearable.API)
-                    .build();
-
-            mGoogleApiClient.connect();
-
             weatherDetail = null;
 
         }
@@ -335,6 +311,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
 
         @Override // DataApi.DataListener
         public void onDataChanged(DataEventBuffer dataEvents) {
+            Log.e(TAG, "onDataChanged");
             for (DataEvent dataEvent : dataEvents) {
                 if (dataEvent.getType() != DataEvent.TYPE_CHANGED) {
                     continue;

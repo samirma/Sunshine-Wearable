@@ -16,6 +16,7 @@ import com.example.android.sunshine.app.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataMap;
@@ -38,7 +39,7 @@ public class WearbleSync {
     private final GoogleApiClient mGoogleApiClient;
     private final Context context;
 
-    private static String oldData = "";
+    public static String oldData = "";
 
     public WearbleSync(final Context context){
         this.context = context;
@@ -91,15 +92,19 @@ public class WearbleSync {
             PutDataMapRequest putDataMapReq = PutDataMapRequest.create(WEATHER);
             final DataMap dataMap = putDataMapReq.getDataMap();
 
-            dataMap.putDouble(COLUMN_MAX_TEMP, high);
-            dataMap.putDouble(COLUMN_MIN_TEMP, low);
-            dataMap.putString(COLUMN_SHORT_DESC, desc);
-            dataMap.putAsset(IMG, asset);
+            //dataMap.putDouble(COLUMN_MAX_TEMP, high);
 
             PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-            PendingResult<DataApi.DataItemResult> pendingResult =
-                    Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
 
+
+            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq)
+                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(DataApi.DataItemResult dataItemResult) {
+                            final boolean success = dataItemResult.getStatus().isSuccess();
+                            Log.e(LOG_TAG, String.format("PutDataItem %s, Status code: %d", success, dataItemResult.getStatus().getStatusCode()));
+                        }
+                    });
 
         }
 

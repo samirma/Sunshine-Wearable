@@ -33,6 +33,7 @@ import android.view.View;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.gcm.RegistrationIntentService;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.example.android.sunshine.app.sync.WearbleSync;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -126,6 +127,12 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
+        if (id == R.id.action_refresh) {
+            WearbleSync.oldData = "";
+            SunshineSyncAdapter.syncImmediately(this);
             return true;
         }
 
