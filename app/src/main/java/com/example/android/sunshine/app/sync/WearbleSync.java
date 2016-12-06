@@ -3,6 +3,7 @@ package com.example.android.sunshine.app.sync;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,6 +18,8 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.util.Random;
 
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MAX_TEMP;
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MIN_TEMP;
@@ -75,31 +78,12 @@ public class WearbleSync {
         int weatherId = new Integer(contentValues.getAsString(COLUMN_WEATHER_ID));
 
         final String dataString = String.format("%s-%s-%s-%s", weatherId, desc, low, high);
-        if (!oldData.equals(dataString)) {
-            oldData = dataString;
-            //final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
-            //Asset asset = createAssetFromBitmap(bitmap);
 
+        PutDataMapRequest request = PutDataMapRequest.create("/image");
+        DataMap map = request.getDataMap();
 
-            PutDataMapRequest putDataMapReq = PutDataMapRequest.create(WEATHER);
-            final DataMap dataMap = putDataMapReq.getDataMap();
-
-            dataMap.putDouble(COLUMN_MAX_TEMP, high);
-
-            PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-
-
-            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq)
-                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                        @Override
-                        public void onResult(DataApi.DataItemResult dataItemResult) {
-                            final boolean success = dataItemResult.getStatus().isSuccess();
-                            Log.e(LOG_TAG, String.format("PutDataItem %s, Status code: %d", success, dataItemResult.getStatus().getStatusCode()));
-                        }
-                    });
-
-
-        }
+        map.putString("dataString", dataString);
+        Wearable.DataApi.putDataItem(mGoogleApiClient, request.asPutDataRequest());
 
     }
 

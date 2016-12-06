@@ -87,11 +87,11 @@ public class WearActivity extends Activity {
                         event.getDataItem().getUri().getPath().equals("/image")) {
 
                     DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                    final int integer = dataMapItem.getDataMap().getInt("Integer");
+                    final String integer = dataMapItem.getDataMap().getString("dataString");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mTextView.setText(new String(integer + ""));
+                            mTextView.setText(integer);
 
                         }
                     });
