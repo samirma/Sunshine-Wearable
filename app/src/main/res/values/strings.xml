@@ -237,4 +237,9 @@
     <string name="attribution_text">Powered by Google</string>
     <string name="update">Update</string>
 
+    <string name="send_image_button">Send an image to Android Wear</string>
+    <string name="send_message_button">Send the Message to Android Wear</string>
+    <string name="send_message_text">Enter a message to send</string>
+
+
 </resources>
