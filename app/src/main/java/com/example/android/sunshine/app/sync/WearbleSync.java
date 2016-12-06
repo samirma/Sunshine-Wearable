@@ -77,10 +77,15 @@ public class WearbleSync {
         String desc = contentValues.getAsString(COLUMN_SHORT_DESC);
         int weatherId = new Integer(contentValues.getAsString(COLUMN_WEATHER_ID));
 
-        final String dataString = String.format("%s-%s-%s-%s", weatherId, desc, low, high);
+        final String dataString = String.format("%s-%s-%s-%s-%s", weatherId, desc, low, high, System.currentTimeMillis());
 
         PutDataMapRequest request = PutDataMapRequest.create("/image");
         DataMap map = request.getDataMap();
+
+        map.putDouble(COLUMN_MAX_TEMP, high);
+        map.putDouble(COLUMN_MIN_TEMP, low);
+        map.putString(COLUMN_SHORT_DESC, desc);
+        map.putInt(COLUMN_WEATHER_ID, weatherId);
 
         map.putString("dataString", dataString);
         Wearable.DataApi.putDataItem(mGoogleApiClient, request.asPutDataRequest());

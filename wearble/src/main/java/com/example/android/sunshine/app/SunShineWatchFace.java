@@ -78,10 +78,13 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
     public static final String TAG = SunShineWatchFace.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
     private WeatherDetail weatherDetail;
+    private WearbleSync wearbleSync;
 
     @Override
     public Engine onCreateEngine() {
-        return new Engine();
+        final Engine engine = new Engine();
+        wearbleSync = new WearbleSync(getBaseContext(), engine);
+        return engine;
     }
 
     private static class EngineHandler extends Handler {
@@ -104,7 +107,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener {
+    private class Engine extends CanvasWatchFaceService.Engine implements WearbleView {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
@@ -309,27 +312,9 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
         }
 
 
-        @Override // DataApi.DataListener
-        public void onDataChanged(DataEventBuffer dataEvents) {
-            Log.e(TAG, "onDataChanged");
-            for (DataEvent dataEvent : dataEvents) {
-                if (dataEvent.getType() != DataEvent.TYPE_CHANGED) {
-                    continue;
-                }
-
-                DataItem dataItem = dataEvent.getDataItem();
-                if (!dataItem.getUri().getPath().equals(WEATHER)) {
-                    continue;
-                }
-
-                DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem);
-                DataMap config = dataMapItem.getDataMap();
-
-                weatherDetail = new WeatherDetail(config);
-
-
-            }
+        @Override
+        public void setWeatherDetail(WeatherDetail detail) {
+            weatherDetail = detail;
         }
-
     }
 }

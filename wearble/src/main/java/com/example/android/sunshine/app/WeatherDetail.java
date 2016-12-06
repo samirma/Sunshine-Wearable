@@ -18,11 +18,12 @@ public class WeatherDetail {
     private final Asset asset;
     private final double high;
     private final double low;
+    private final String desc;
 
     public WeatherDetail(DataMap config) {
         high = config.getDouble(COLUMN_MAX_TEMP);
         low = config.getDouble(COLUMN_MIN_TEMP);
-        String desc = config.getString(COLUMN_SHORT_DESC);
+        desc = config.getString(COLUMN_SHORT_DESC);
         asset = config.getAsset(IMG);
     }
 }
