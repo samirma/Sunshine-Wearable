@@ -79,27 +79,27 @@ public class WearbleSync {
 
         final String dataString = String.format("%s-%s-%s-%s-%s", weatherId, desc, low, high, System.currentTimeMillis());
 
-        PutDataMapRequest request = PutDataMapRequest.create("/image");
+        PutDataMapRequest request = PutDataMapRequest.create(WEATHER);
         DataMap map = request.getDataMap();
+
+        final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
 
         map.putDouble(COLUMN_MAX_TEMP, high);
         map.putDouble(COLUMN_MIN_TEMP, low);
         map.putString(COLUMN_SHORT_DESC, desc);
         map.putInt(COLUMN_WEATHER_ID, weatherId);
+        final Bitmap bitmap1 = bitmap;
+        map.putAsset(IMG, createAssetFromBitmap(bitmap1));
 
         map.putString("dataString", dataString);
         Wearable.DataApi.putDataItem(mGoogleApiClient, request.asPutDataRequest());
 
     }
 
+
     protected void onStart() {
         mGoogleApiClient.connect();
     }
 
-    protected void onStop() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-    }
 
 }

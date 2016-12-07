@@ -59,7 +59,7 @@ public class WearbleSync {
         public void onDataChanged(DataEventBuffer dataEvents) {
             for (DataEvent event : dataEvents) {
                 if (event.getType() == DataEvent.TYPE_CHANGED &&
-                        event.getDataItem().getUri().getPath().equals("/image")) {
+                        event.getDataItem().getUri().getPath().equals(WEATHER)) {
 
                     DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                     final DataMap dataMap = dataMapItem.getDataMap();
