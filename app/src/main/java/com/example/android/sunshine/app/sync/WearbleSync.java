@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.android.sunshine.app.BuildConfig;
 import com.example.android.sunshine.app.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -78,7 +79,6 @@ public class WearbleSync {
         String desc = contentValues.getAsString(COLUMN_SHORT_DESC);
         int weatherId = new Integer(contentValues.getAsString(COLUMN_WEATHER_ID));
 
-        final String dataString = String.format("%s-%s-%s-%s-%s", weatherId, desc, low, high, System.currentTimeMillis());
 
         PutDataMapRequest request = PutDataMapRequest.create(WEATHER);
         DataMap map = request.getDataMap();
@@ -92,7 +92,11 @@ public class WearbleSync {
         final Bitmap bitmap1 = bitmap;
         map.putAsset(IMG, createAssetFromBitmap(bitmap1));
 
-        map.putString("dataString", dataString);
+        if (BuildConfig.DEBUG){
+            final String dataString = String.format("%s", System.currentTimeMillis());
+            map.putString("dataString", dataString);
+        }
+
         Wearable.DataApi.putDataItem(mGoogleApiClient, request.asPutDataRequest());
 
     }
