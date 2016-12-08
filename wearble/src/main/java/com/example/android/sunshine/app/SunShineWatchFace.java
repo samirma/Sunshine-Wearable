@@ -235,6 +235,11 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
             mTextPaint.setTextSize(textSize);
+
+            final float tempSize = textSize / 3;
+            mMinTempPaint.setTextSize(tempSize);
+            mMaxTempPaint.setTextSize(tempSize);
+
         }
 
         @Override
@@ -296,7 +301,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
 
             if (!mAmbient) {
                 // draw line
-                canvas.drawLine(bounds.centerX() - 20, bounds.centerY() - 20 + 50, bounds.centerX() + 20, bounds.centerY() - 20 + 50, mDatePaint);
+                canvas.drawLine(bounds.centerX() - 20, bounds.centerY(), bounds.centerX() + 20, bounds.centerY(), mDatePaint);
 
                 if (weatherDetail != null) {
                     final String minTemp = weatherDetail.low;
@@ -307,7 +312,8 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
                     mMinTempPaint.getTextBounds(minTemp, 0, minTemp.length(), textBounds);
                     canvas.drawText(minTemp, bounds.centerX() + 80 - textBounds.width() / 2, bounds.centerY() - 20 + 90, mMinTempPaint);
 
-                    canvas.drawBitmap(weatherDetail.bitmap, null, new RectF(bounds.centerX() - 100, bounds.centerY() + 10 + 10, bounds.centerX(), bounds.centerY() + 90 + 10), null);
+                    final RectF dst = new RectF(bounds.centerX() - 150, bounds.centerY() + 10 + 10, bounds.centerX() -50 , bounds.centerY() + 90 + 10);
+                    canvas.drawBitmap(weatherDetail.bitmap, null, dst, null);
                 }
 
             }
