@@ -391,7 +391,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void updateWearble(ContentValues contentValues) {
-        wearbleSync.updateWearble(contentValues);
+        wearbleSync.updateWearble(contentValues, getContext());
     }
 
     private void updateWidgets() {

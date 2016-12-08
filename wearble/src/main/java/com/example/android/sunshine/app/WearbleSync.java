@@ -63,13 +63,23 @@ public class WearbleSync {
 
                     DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                     final DataMap dataMap = dataMapItem.getDataMap();
-                    final String integer = dataMap.getString("dataString");
 
-                    final WeatherDetail weatherDetail = new WeatherDetail(dataMap);
-                    view.setWeatherDetail(weatherDetail);
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            final WeatherDetail weatherDetail = new WeatherDetail(dataMap, mGoogleApiClient);
+                            view.setWeatherDetail(weatherDetail);
+                        }
+                    }.start();
 
                 }
             }
         }
     };
+
+    public void disconnect() {
+        if (mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
+        }
+    }
 }

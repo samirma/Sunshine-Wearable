@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.android.sunshine.app.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -70,7 +71,7 @@ public class WearbleSync {
         return Asset.createFromBytes(byteStream.toByteArray());
     }
 
-    protected void updateWearble(ContentValues contentValues) {
+    protected void updateWearble(ContentValues contentValues, Context context) {
 
         double high = contentValues.getAsDouble(COLUMN_MAX_TEMP);
         double low = contentValues.getAsDouble(COLUMN_MIN_TEMP);
@@ -82,10 +83,10 @@ public class WearbleSync {
         PutDataMapRequest request = PutDataMapRequest.create(WEATHER);
         DataMap map = request.getDataMap();
 
-        final Bitmap bitmap = SunshineSyncAdapter.getBitmap(context, weatherId, context.getResources());
+        final Bitmap bitmap = SunshineSyncAdapter.getBitmap(this.context, weatherId, this.context.getResources());
 
-        map.putDouble(COLUMN_MAX_TEMP, high);
-        map.putDouble(COLUMN_MIN_TEMP, low);
+        map.putString(COLUMN_MAX_TEMP, Utility.formatTemperature(context, high));
+        map.putString(COLUMN_MIN_TEMP, Utility.formatTemperature(context, low));
         map.putString(COLUMN_SHORT_DESC, desc);
         map.putInt(COLUMN_WEATHER_ID, weatherId);
         final Bitmap bitmap1 = bitmap;

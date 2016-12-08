@@ -25,32 +25,22 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.Wearable;
 
 import java.lang.ref.WeakReference;
+import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -112,6 +102,9 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
         Paint mTextPaint;
+        Paint mDatePaint;
+        Paint mMinTempPaint;
+        Paint mMaxTempPaint;
         boolean mAmbient;
         Calendar mCalendar;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -129,6 +122,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
          * disable anti-aliasing in ambient mode.
          */
         boolean mLowBitAmbient;
+        private Date mDate;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -152,12 +146,33 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
 
             weatherDetail = null;
 
+            mBackgroundPaint = new Paint();
+            mBackgroundPaint.setColor(resources.getColor(R.color.dark_blue));
+
+            mTextPaint = new Paint();
+            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+
+            mDatePaint = new Paint();
+            mDatePaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mDatePaint.setAlpha(200);
+
+
+            mMaxTempPaint = new Paint();
+            mMaxTempPaint = createTextPaint(resources.getColor(R.color.digital_text));
+
+            mMinTempPaint = new Paint();
+            mMinTempPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mMinTempPaint.setAlpha(200);
+
+            mCalendar = Calendar.getInstance();
+            mDate = new Date();
+
         }
 
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
-            if (mGoogleApiClient.isConnected()){
+            if (mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.disconnect();
             }
             super.onDestroy();
@@ -259,23 +274,43 @@ public class SunShineWatchFace extends CanvasWatchFaceService {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             }
 
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
+
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            if (weatherDetail != null) {
-                canvas.drawText(weatherDetail.toString(), mXOffset, mYOffset, mTextPaint);
-            } else {
+            DateFormat dateFormat = DateFormat.getDateInstance();
+            dateFormat.setCalendar(mCalendar);
 
-                String text = mAmbient
-                        ? String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
-                        mCalendar.get(Calendar.MINUTE))
-                        : String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR),
-                        mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
-                canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+            String text = mAmbient
+                    ? String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
+                    mCalendar.get(Calendar.MINUTE))
+                    : String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR),
+                    mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
+
+            mCalendar.get(Calendar.AM_PM);
+
+            Rect textBounds = new Rect();
+
+            mTextPaint.getTextBounds(text, 0, text.length(), textBounds);
+            canvas.drawText(text, bounds.centerX() - textBounds.width() / 2, bounds.centerY() - 40, mTextPaint);
+
+            if (!mAmbient) {
+                // draw line
+                canvas.drawLine(bounds.centerX() - 20, bounds.centerY() - 20 + 50, bounds.centerX() + 20, bounds.centerY() - 20 + 50, mDatePaint);
+
+                if (weatherDetail != null) {
+                    final String minTemp = weatherDetail.low;
+                    final String maxTemp = weatherDetail.high;
+                    mMaxTempPaint.getTextBounds(maxTemp, 0, maxTemp.length(), textBounds);
+                    canvas.drawText(maxTemp, bounds.centerX() + 20 - textBounds.width() / 2, bounds.centerY() - 20 + 90, mMaxTempPaint);
+
+                    mMinTempPaint.getTextBounds(minTemp, 0, minTemp.length(), textBounds);
+                    canvas.drawText(minTemp, bounds.centerX() + 80 - textBounds.width() / 2, bounds.centerY() - 20 + 90, mMinTempPaint);
+
+                    canvas.drawBitmap(weatherDetail.bitmap, null, new RectF(bounds.centerX() - 100, bounds.centerY() + 10 + 10, bounds.centerX(), bounds.centerY() + 90 + 10), null);
+                }
 
             }
-
 
         }
 

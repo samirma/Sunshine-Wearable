@@ -23,7 +23,7 @@ public class WearbleSyncTest extends AndroidTestCase {
         contentValues.put(COLUMN_MIN_TEMP, 2.0d);
         contentValues.put(COLUMN_SHORT_DESC, "desc");
         contentValues.put(COLUMN_WEATHER_ID, "1");
-        wearbleSync.updateWearble(contentValues);
+        wearbleSync.updateWearble(contentValues, getContext());
 
         Thread.sleep(2000);
 
