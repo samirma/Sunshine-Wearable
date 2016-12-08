@@ -3,7 +3,6 @@ package com.example.android.sunshine.app.sync;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -11,17 +10,12 @@ import com.example.android.sunshine.app.BuildConfig;
 import com.example.android.sunshine.app.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.Random;
 
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MAX_TEMP;
 import static com.example.android.sunshine.app.data.WeatherContract.WeatherEntry.COLUMN_MIN_TEMP;
@@ -95,6 +89,7 @@ public class WearbleSync {
         if (BuildConfig.DEBUG){
             final String dataString = String.format("%s", System.currentTimeMillis());
             map.putString("dataString", dataString);
+            request.setUrgent();
         }
 
         Wearable.DataApi.putDataItem(mGoogleApiClient, request.asPutDataRequest());
